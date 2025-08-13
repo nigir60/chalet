@@ -236,6 +236,11 @@
                     <option value="V/M">Les deux</option>
                 </select>
                 
+                <label>Hôte:</label>
+                <select id="inviterFilter">
+                    <option value="">Tous</option>
+                </select>
+                
                 <button onclick="applyFilters()">Appliquer filtres</button>
                 <button onclick="resetFilters()">Réinitialiser</button>
             </div>
@@ -584,21 +589,34 @@
                 option.textContent = year;
                 yearSelect.appendChild(option);
             });
+
+            // Ajout du filtre hôte/inviter
+            const inviterSelect = document.getElementById('inviterFilter');
+            const inviters = [...new Set(allVisitors
+                .map(v => v.lien && v.lien.trim())
+                .filter(lien => lien && lien.length > 0))].sort();
+            inviters.forEach(inviter => {
+                const option = document.createElement('option');
+                option.value = inviter;
+                option.textContent = inviter;
+                inviterSelect.appendChild(option);
+            });
         }
         
         function applyFilters() {
             const nameFilter = document.getElementById('searchName').value.toLowerCase();
             const yearFilter = document.getElementById('yearFilter').value;
             const transportFilter = document.getElementById('transportFilter').value;
-            
+            const inviterFilter = document.getElementById('inviterFilter').value;
+
             filteredVisitors = allVisitors.filter(visitor => {
                 const nameMatch = !nameFilter || 
                     visitor.nom.toLowerCase().includes(nameFilter) || 
                     visitor.prenom.toLowerCase().includes(nameFilter);
                 const yearMatch = !yearFilter || visitor.annee === yearFilter;
                 const transportMatch = !transportFilter || visitor.type === transportFilter;
-                
-                return nameMatch && yearMatch && transportMatch;
+                const inviterMatch = !inviterFilter || visitor.lien === inviterFilter;
+                return nameMatch && yearMatch && transportMatch && inviterMatch;
             });
             
             updateStats();
@@ -610,6 +628,7 @@
             document.getElementById('searchName').value = '';
             document.getElementById('yearFilter').value = '';
             document.getElementById('transportFilter').value = '';
+            document.getElementById('inviterFilter').value = '';
             filteredVisitors = [...allVisitors];
             updateStats();
             updateTable();
@@ -804,9 +823,9 @@
             document.getElementById('searchName').addEventListener('input', applyFilters);
             document.getElementById('yearFilter').addEventListener('change', applyFilters);
             document.getElementById('transportFilter').addEventListener('change', applyFilters);
+            document.getElementById('inviterFilter').addEventListener('change', applyFilters);
         });
     </script>
 </body>
 
 </html>
-
