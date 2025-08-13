@@ -632,24 +632,35 @@
                 yearChart.destroy();
             }
             
+            // Toutes les années du min au max, même celles à 0 visiteurs
+            const yearsWithData = filteredVisitors.filter(v => v.annee).map(v => parseInt(v.annee)).filter(Number.isFinite);
+            if (yearsWithData.length === 0) return;
+            const minYear = Math.min(...yearsWithData);
+            const maxYear = Math.max(...yearsWithData);
+            const allYears = [];
+            for(let y = minYear; y <= maxYear; y++) {
+                allYears.push(y);
+            }
+            
+            // Comptage des visiteurs par année
             const yearCounts = filteredVisitors.filter(v => v.annee).reduce((acc, v) => {
                 acc[v.annee] = (acc[v.annee] || 0) + 1;
                 return acc;
             }, {});
             
-            const sortedYears = Object.keys(yearCounts).sort();
+            // Générer le tableau de données pour toutes les années
+            const chartData = allYears.map(year => yearCounts[year] || 0);
             
             yearChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar', // Changement: bar au lieu de line
                 data: {
-                    labels: sortedYears,
+                    labels: allYears,
                     datasets: [{
                         label: 'Nouveaux visiteurs',
-                        data: sortedYears.map(year => yearCounts[year]),
+                        data: chartData,
+                        backgroundColor: 'rgba(45, 80, 22, 0.8)',
                         borderColor: '#2d5016',
-                        backgroundColor: 'rgba(45, 80, 22, 0.1)',
-                        tension: 0.4,
-                        fill: true
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -665,6 +676,12 @@
                             beginAtZero: true,
                             ticks: {
                                 stepSize: 1
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
                             }
                         }
                     }
@@ -790,5 +807,5 @@
         });
     </script>
 </body>
-</html>
 
+</html>
